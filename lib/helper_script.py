@@ -142,12 +142,17 @@ def read_SQL(SQL_file, runs):
     unique_runconfigs = set(runconfigs)
 
     beam_run_types = {39, 34, 3}
-    
+    ambe_run_types = {42, 43}   # AmBe configs that share the same toolchain
+
+    # Groups of run configs that are allowed to be mixed in a single batch
+    allowed_mixed_groups = [beam_run_types, ambe_run_types]
+
     # Check for consistent run configurations: we dont want to process beam runs with the same grid resources
     if len(unique_runconfigs) > 1:
-        if not unique_runconfigs.issubset(beam_run_types):
+        is_known_group = any(unique_runconfigs.issubset(g) for g in allowed_mixed_groups)
+        if not is_known_group:
             print(f'ERROR: The runs have inconsistent run types: {unique_runconfigs}\n'
-                  f'Please ensure all runs are the same (except for beam runs: 39, 34, or 3)')
+                  f'Please ensure all runs are the same (except for beam runs: 39, 34, or 3; or AmBe runs: 42, 43)')
             proceed = input("\nWould you like to continue anyway? (yes/no): ")
             if proceed.lower() != 'yes':
                 print("\nExiting...\n")
@@ -457,8 +462,9 @@ def wait(length_of_time):
     print('\n\n------------------------------------------------')
     print('Waiting for jobs to complete... going to sleep...\n')
     for i in range(length_of_time):
-       print('Zzzz ... ' + str(i) + '/' + str(length_of_time) + ' minutes until my alarm goes off ... Zzzz\n')
-       time.sleep(60)
+        print('Zzzz ... ' + str(i) + '/' + str(length_of_time) + ' minutes until my alarm goes off ... Zzzz\n')
+        for _ in range(60):
+            time.sleep(1)
 
     print('\nI am awake!\n')
 

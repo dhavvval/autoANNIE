@@ -5,8 +5,11 @@
 
 import os
 import time
+import signal
 from lib import helper_script as hs
 from lib import submit_jobs as sj
+
+signal.signal(signal.SIGINT, lambda sig, frame: (print('\n\nInterrupt received. Exiting...\n'), exit(0)))
 
 #
 #
@@ -35,6 +38,12 @@ initial_submission_only = False                   # run PreProcess, BeamFetcher,
 
 clear_scratch = False                             # will prompt the user with the option to delete run folders (Processed + BeamCluster) in your scratch output (useful if re-processing runs)
 
+raw_path = '/pnfs/annie/persistent/raw/raw/'      # raw data location, transferred from the DAQ
+processed_path = '/pnfs/annie/persistent/processed/'  # general directory for processed data
+
+BC_job_size = 50           # number of part files per BeamCluster job (500 is the recommended max)
+resub_step_size = 1        # part file step size used for resubmissions (keep at 1 to retry individually)
+
 '''@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'''
 
 #
@@ -50,18 +59,16 @@ app_path = '/exp/annie/app/users/' + user + '/' + TA_folder                     
 scratch_path = '/pnfs/annie/scratch/users/' + user + '/' + grid_sub_dir                            # clone autoANNIE repository/set of grid scripts
 output_path = '/pnfs/annie/scratch/users/' + user + '/' + grid_output                              # general output directory (event building jobs will be outputted directly here)
 BC_scratch_output_path = output_path + 'beamcluster/'                                              # output from the BeamCluster jobs (embedded in folder above)
-raw_path = '/pnfs/annie/persistent/raw/raw/'                                                       # raw data location, transferred from the DAQ
-processed_path = '/pnfs/annie/persistent/processed/'                                               # general directory for "processed" data, such as BeamFetcher files, ProcessedData, etc...
 
 data_path = processed_path + 'processed_EBV2/'                                                     # Processed Data
-trig_path = '/pnfs/annie/persistent/processed/trigoverlap/'                                        # trigger overlap tar files
+trig_path = processed_path + 'trigoverlap/'                                                         # trigger overlap tar files
 beamcluster_path = processed_path + 'BeamClusterTrees/'                                            # BeamCluster root files
 beamfetcher_path = processed_path + 'BeamFetcherV2/'                                               # BeamFetcherV2 root files
 lappd_EB_path = processed_path + 'LAPPD_EB_output/'                                                # contains two subdirectories: LAPPDTree and offsetFit
 lappd_BC_path = beamcluster_path + 'LAPPDBeamClusterTrees/'                                        # filtered events w/ LAPPDs stored in root files
 lappd_filter_path = processed_path + 'processed_EBV2_LAPPDFiltered/'                               # filtered, processed data w/ LAPPD events
 mrd_filter_path = processed_path + 'processed_EBV2_MRDFiltered/'                                   # same, for the MRD
-lappd_pedestal_path = '/pnfs/annie/persistent/processed/processingData_EBV2/LAPPD_Pedestal/'       # Pedestal files for the LAPPDs in the BeamCluster jobs
+lappd_pedestal_path = processed_path + 'processingData_EBV2/LAPPD_Pedestal/'                       # Pedestal files for the LAPPDs in the BeamCluster jobs
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -127,7 +134,6 @@ if which_mode == '1':      # Event building mode
 
     # user provided arguments
     step_size = int(input('Please specify the job part file size:     '))
-    resub_step_size = 1    # not provided by user - manually set for resubmissions
     which_node = int(input('\nOFFSITE (1) or ONSITE (2)  (OFFSITE is recommended):     '))
     if which_node == 1:
         node_loc = 'OFFSITE'
@@ -327,8 +333,6 @@ if which_mode == '1':      # Event building mode
 
 
 if which_mode == '2':        # BeamCluster
-
-    BC_job_size = 50         # how many part files per job  (500 is the recommended max)
 
     print(usage_verbose_BC, '\n')
 
