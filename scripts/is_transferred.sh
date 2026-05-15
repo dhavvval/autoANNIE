@@ -12,8 +12,12 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+# ---- Configuration ----
+RAW_PATH="/pnfs/annie/persistent/raw/raw"   # path to raw data
+# -----------------------
+
 RUN_NUMBER=$1
-DIRECTORY="/pnfs/annie/persistent/raw/raw/$RUN_NUMBER"
+DIRECTORY="${RAW_PATH}/${RUN_NUMBER}"
 RAWFILE="RAWDataR${RUN_NUMBER}S0p*"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

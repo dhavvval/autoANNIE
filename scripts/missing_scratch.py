@@ -2,8 +2,8 @@ import os, sys
 
 # script to give you a quick snapshot on the data processing status of a particular run
 
-''' 
-usage: python3 scripts/missing_scratch.py
+'''
+usage: python3 scripts/missing_scratch.py <run_number>
 
 output:
 
@@ -15,10 +15,15 @@ Missing processed files:  [46, 47]
 Percentage processed:  98.33 %
 '''
 
-run = sys.argv[1]
-raw_path = '/pnfs/annie/persistent/raw/raw/'
-output_path = '/pnfs/annie/scratch/users/<user>/output/'  # adjust accordingly
-run_type = 'beam'
+# ---- Configuration (must match master_script.py settings) ----
+user        = os.environ.get('USER', '<user>')  # ANNIE username — defaults to $USER env var; override if different
+grid_output = 'output/'                          # must match grid_output in master_script.py
+run_type    = 'beam'                             # run type to check
+# ---------------------------------------------------------------
+
+run         = sys.argv[1]
+raw_path    = '/pnfs/annie/persistent/raw/raw/'
+output_path = '/pnfs/annie/scratch/users/' + user + '/' + grid_output
 
 # check output location for missing processed files after job submissions (in /scratch)
 def missing_scratch(run_number, raw_path, output_path, run_type):

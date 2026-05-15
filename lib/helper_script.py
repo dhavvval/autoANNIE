@@ -387,7 +387,9 @@ def my_jobs(submitted_runs, user):
             break
     
     # only consider jobs that are currently running or idle
-    filtered_lines = [line.strip().split() for line in lines[1:] if ('I' in line.strip().split()[-5] or 'R' in line.strip().split()[-5])]
+    filtered_lines = [line.strip().split() for line in lines[1:]
+                      if len(line.strip().split()) >= 5 and
+                      ('I' in line.strip().split()[-5] or 'R' in line.strip().split()[-5])]
     # only consider jobs form the list with the form: <run>_<p1>_<p2>    (isdigit() checks that the string consists of only digits and underscores)
     jobs = [line for line in filtered_lines if line[9].replace('_', '').isdigit()]
     active_jobs = len(jobs)
@@ -428,7 +430,10 @@ def my_jobs_BC(submitted_runs, user):
             lines = lines[i:]
             break
     
-    filtered_lines = [line.strip().split() for line in lines[1:] if ('I' in line.strip().split()[-8] or 'R' in line.strip().split()[-8]) and 'BC_' in line.strip().split()[-4]]
+    filtered_lines = [line.strip().split() for line in lines[1:]
+                      if len(line.strip().split()) >= 8 and
+                      ('I' in line.strip().split()[-8] or 'R' in line.strip().split()[-8]) and
+                      'BC_' in line.strip().split()[-4]]
     jobs = [line for line in filtered_lines if line[9].startswith(f"BC_")]
     active_jobs = len(jobs)
     print('\nThere are', active_jobs, 'jobs currently running\n')

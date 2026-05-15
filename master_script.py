@@ -35,6 +35,10 @@ initial_submission_only = False                   # run PreProcess, BeamFetcher,
 
 clear_scratch = False                             # will prompt the user with the option to delete run folders (Processed + BeamCluster) in your scratch output (useful if re-processing runs)
 
+resub_step_size = 1                               # part files per job for re-submissions (1 is recommended; smaller = more targeted retries)
+
+BC_job_size = 50                                  # processed part files per BeamCluster job (500 is the recommended max)
+
 '''@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'''
 
 #
@@ -127,7 +131,6 @@ if which_mode == '1':      # Event building mode
 
     # user provided arguments
     step_size = int(input('Please specify the job part file size:     '))
-    resub_step_size = 1    # not provided by user - manually set for resubmissions
     which_node = int(input('\nOFFSITE (1) or ONSITE (2)  (OFFSITE is recommended):     '))
     if which_node == 1:
         node_loc = 'OFFSITE'
@@ -327,8 +330,6 @@ if which_mode == '1':      # Event building mode
 
 
 if which_mode == '2':        # BeamCluster
-
-    BC_job_size = 50         # how many part files per job  (500 is the recommended max)
 
     print(usage_verbose_BC, '\n')
 

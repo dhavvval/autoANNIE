@@ -11,14 +11,18 @@ import os
 import subprocess
 import time
 
-# configurations
-RUN_LIST = "runs.list"    # list of runs to copy
-COPY_SCRIPT = "lib/copy_grid_output.sh"
-OUTPUT_PATH = "/pnfs/annie/scratch/users/<user>/output/"      # adjust accordingly
-PROCESSED_PATH = "/pnfs/annie/persistent/processed/processed_EBV2/"
-LAPPD_PROCESSED_PATH = "/pnfs/annie/persistent/processed/LAPPD_EB_output/"
-RAW_PATH = "/pnfs/annie/persistent/raw/raw/"
-RUN_TYPE = "beam"            # ProcessedData format will be different for each run type
+# ---- Configuration (must match master_script.py settings) ----
+user        = os.environ.get('USER', '<user>')  # ANNIE username — defaults to $USER env var; override if different
+grid_output = 'output/'                          # must match grid_output in master_script.py
+RUN_TYPE    = 'beam'                             # ProcessedData format differs per run type
+# ---------------------------------------------------------------
+
+RUN_LIST             = 'runs.list'
+COPY_SCRIPT          = 'lib/copy_grid_output.sh'
+OUTPUT_PATH          = '/pnfs/annie/scratch/users/' + user + '/' + grid_output
+PROCESSED_PATH       = '/pnfs/annie/persistent/processed/processed_EBV2/'
+LAPPD_PROCESSED_PATH = '/pnfs/annie/persistent/processed/LAPPD_EB_output/'
+RAW_PATH             = '/pnfs/annie/persistent/raw/raw/'
 
 def missing_after_transfer(run_number):
     raw_data_dir = os.path.join(RAW_PATH, run_number)
