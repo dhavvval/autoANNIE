@@ -10,15 +10,17 @@ fi
 
 RUN=$1
 
-# edit accordingly
-
-USER=<USER>
+# ---- Configuration (must match master_script.py settings) ----
+USER=$(whoami)                     # ANNIE username — defaults to your system username; override if different
+GRID_SUB_DIR="autoANNIE/"         # must match grid_sub_dir in master_script.py
+GRID_OUTPUT="output/"              # must match grid_output in master_script.py
+# ---------------------------------------------------------------
 
 SINGULARITY_COMMAND="-B/pnfs:/pnfs,/exp/annie/app/users/${USER}/temp_directory:/tmp,/exp/annie/data:/exp/annie/data,/exp/annie/app:/exp/annie/app"
 BC_PATH=/pnfs/annie/persistent/processed/BeamClusterTrees/
-SCRATCH_PATH=/pnfs/annie/scratch/users/${USER}/autoANNIE/
+SCRATCH_PATH=/pnfs/annie/scratch/users/${USER}/${GRID_SUB_DIR}
 LAPPD_BC_PATH=/pnfs/annie/persistent/processed/BeamClusterTrees/LAPPDBeamClusterTrees/
-BC_SCRATCH_OUTPUT_PATH=/pnfs/annie/scratch/users/${USER}/output/beamcluster/
+BC_SCRATCH_OUTPUT_PATH=/pnfs/annie/scratch/users/${USER}/${GRID_OUTPUT}beamcluster/
 LAPPD_FILTER_PATH=/pnfs/annie/persistent/processed/processed_EBV2_LAPPDFiltered/
 MRD_FILTER_PATH=/pnfs/annie/persistent/processed/processed_EBV2_MRDFiltered/
 

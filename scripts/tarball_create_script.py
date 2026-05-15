@@ -1,11 +1,15 @@
 import os, time
 
 # script to create tar-ball for grid submission scripts
-# usage: python3 tarball_create_script.py
+# usage: python3 scripts/tarball_create_script.py
 
-tarball_name = 'MyToolAnalysis_grid.tar.gz'
-folder_path = '/exp/annie/app/users/<user>/'
-folder_name = 'EventBuilding/'
+# ---- Configuration (must match master_script.py settings) ----
+user         = os.environ.get('USER', '<user>')   # ANNIE username — defaults to $USER env var; override if different
+tarball_name = 'MyToolAnalysis_grid.tar.gz'        # must match TA_tar_name in master_script.py
+folder_name  = 'EventBuilding/'                    # must match TA_folder in master_script.py
+# ---------------------------------------------------------------
+
+folder_path = '/exp/annie/app/users/' + user + '/'
 
 tar_command = 'tar -czvf ' + tarball_name + ' -C ' + folder_path + ' ' + folder_name
 

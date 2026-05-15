@@ -7,7 +7,7 @@ import math
 
 # output will be:
 #         [run number] [(run type)] [total raw part files] [total processed part files] [total scratch part files] [status]
-#  
+#
 
 # script WILL NOT display runs that do not have RAWData missing, or are below the 'min_part_size' threshold
 #        --------
@@ -18,7 +18,14 @@ import math
 
 ##########################################################################################
 
-run_to = 5767                  # the script will show runs up to this one (set to 'current' to display latest runs)
+# ---- Configuration (must match master_script.py settings) ----
+user       = os.environ.get('USER', '<user>')   # ANNIE username — defaults to $USER env var; override if different
+grid_output = 'output/'                          # must match grid_output in master_script.py
+N_per_job   = 50                                 # must match BC_job_size in master_script.py
+SQL_path    = 'ANNIE_SQL_RUNS.txt'               # must match SQL_file in master_script.py
+# ---------------------------------------------------------------
+
+run_to = 'current'             # show runs up to this number (set to 'current' to display latest runs)
 
 run_back = 5300                # the script will only check runs this far back
 
@@ -28,17 +35,11 @@ min_part_size = 3              # only check for runs with atleast this many part
 
 check_BC = False               # True = check BeamCluster files instead
 
-
-# modify accordingly
-rawdata_path = '/pnfs/annie/persistent/raw/raw/'
-prodata_path = '/pnfs/annie/persistent/processed/processed_EBV2/'
-scratch_output = '/pnfs/annie/scratch/users/<user>/output/'          # edit accordingly
-
-beamcluster_path = '/pnfs/annie/persistent/processed/BeamClusterTrees/'
+rawdata_path      = '/pnfs/annie/persistent/raw/raw/'
+prodata_path      = '/pnfs/annie/persistent/processed/processed_EBV2/'
+scratch_output    = '/pnfs/annie/scratch/users/' + user + '/' + grid_output
+beamcluster_path  = '/pnfs/annie/persistent/processed/BeamClusterTrees/'
 BC_scratch_output_path = scratch_output + 'beamcluster/'
-N_per_job = 50   # number of part files per beamcluster job
-
-SQL_path = 'ANNIE_SQL_RUNS.txt'
 
 ##########################################################################################
 
