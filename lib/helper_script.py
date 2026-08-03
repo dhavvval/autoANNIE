@@ -2,6 +2,7 @@ import os
 import time
 import pytz
 import shutil
+import subprocess
 from datetime import datetime
 
 # --------------------------------------------------------------- #
@@ -250,7 +251,11 @@ def read_SQL(SQL_file, runs):
 # Produce trigoverlap files for event building
 def trig_overlap(run, trig_path, app_path, scratch_path, singularity):
 
-    os.system('rm trig.list')
+    subprocess.run([
+        "./lib/ifdh.sh",
+        "rm",
+        "trig.list"
+    ], check=True)
     os.system('echo "' + run + '" >> trig.list')
 
     # does the run have an overlap tar file?
@@ -267,7 +272,12 @@ def trig_overlap(run, trig_path, app_path, scratch_path, singularity):
 # produce beamfetcher part files
 def beamfetcher(run, app_path, scratch_path, singularity, beamfetcher_path):
 
-    os.system('rm beam.list')
+    subprocess.run([
+        "./lib/ifdh.sh",
+        "rm",
+        "beam.list"
+    ], check=True)
+
     os.system('echo "' + run + '" >> beam.list')
     
     # does the run already have a beamfetcher file?
@@ -362,9 +372,20 @@ def missing_after_transfer(run_number, raw_path, data_path, run_type):
         file.write('\nMissing processed files: ' + str(missing_files) + '\n')
         file.write('\nPercentage processed: ' + str(round((num_processed_files/num_raw_files)*100,2)) + '%')
         
-    os.system('cp R' + run_number + '_summary.txt ' + processed_dir + '.')
+    subprocess.run([
+        "./lib/ifdh.sh",
+        "cp",
+        "R" + run_number + "_summary.txt",
+        processed_dir + "."
+    ], check=True)
+    
     time.sleep(1)
-    os.system('rm R' + run_number + '_summary.txt')
+
+    subprocess.run([
+        "./lib/ifdh.sh",
+        "rm",
+        "R" + run_number + "_summary.txt"
+    ], check=True)
 
     return
 
@@ -372,7 +393,11 @@ def missing_after_transfer(run_number, raw_path, data_path, run_type):
 # Query active jobs list for the user (for event building jobs)
 def my_jobs(submitted_runs, user):
 
-    os.system('rm current_jobs.txt')
+    subprocess.run([
+        "./lib/ifdh.sh",
+        "rm",
+        "current_jobs.txt"
+    ], check=True)
     time.sleep(1)
     print('\nFetching active job list...')
     os.system('jobsub_q -G annie --user ' + user + ' >> current_jobs.txt')
@@ -414,7 +439,11 @@ def my_jobs(submitted_runs, user):
 # Query BeamCluster active jobs list for the user
 def my_jobs_BC(submitted_runs, user):
 
-    os.system('rm current_jobs.txt')
+    subprocess.run([
+        "./lib/ifdh.sh",
+        "rm",
+        "current_jobs.txt"
+    ], check=True)
     time.sleep(1)
     print('\nFetching active job list...')
     os.system('jobsub_q -G annie --user ' + user + ' >> current_jobs.txt')
