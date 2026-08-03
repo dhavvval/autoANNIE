@@ -24,7 +24,7 @@ user = 'dajana'
 singularity = '-B/pnfs:/pnfs,/exp/annie/app/users/' + user + '/temp_directory:/tmp,/exp/annie/data:/exp/annie/data,/exp/annie/app:/exp/annie/app'
 
 TA_folder = 'EventBuildforAmBe/'                      # Folder that was tar-balled (Needs to be the same name as the ToolAnalysis directory in /exp/annie/app that will run TrigOverlap + BeamFetcherV2 toolchains)
-TA_tar_name = ' EventBuildforAmBe.tar.gz'        # name of tar-ball
+TA_tar_name = 'EventBuildforAmBe.tar.gz'        # name of tar-ball
 
 grid_sub_dir = 'autoANNIEAmBe/'                       # input grid
 grid_output = 'AmBe/'                           # output grid
@@ -34,10 +34,6 @@ SQL_file = 'ANNIE_SQL_RUNS.txt'                   # SQL filename
 initial_submission_only = False                   # run PreProcess, BeamFetcher, submit the initial jobs and quit
 
 clear_scratch = False                             # will prompt the user with the option to delete run folders (Processed + BeamCluster) in your scratch output (useful if re-processing runs)
-
-resub_step_size = 1                               # part files per job for re-submissions (1 is recommended; smaller = more targeted retries)
-
-BC_job_size = 50                                  # processed part files per BeamCluster job (500 is the recommended max)
 
 '''@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'''
 
@@ -56,10 +52,10 @@ output_path = '/pnfs/annie/scratch/users/' + user + '/' + grid_output           
 BC_scratch_output_path = output_path + 'beamcluster/'                                              # output from the BeamCluster jobs (embedded in folder above)
 raw_path = '/pnfs/annie/persistent/raw/raw/'                                                       # raw data location, transferred from the DAQ
 processed_path = '/pnfs/annie/persistent/processed/'                                               # general directory for "processed" data, such as BeamFetcher files, ProcessedData, etc...
-data_path = '/pnfs/annie/persistent/users/dajana/AmBe/StandaloneAmBeWaveform_test/'
+data_path = '/pnfs/annie/persistent/users/dajana/AmBe/AmBe2.0v4/'
 #data_path = processed_path + 'processed_EBV2/'                                                     # Processed Data
 trig_path = '/pnfs/annie/persistent/processed/trigoverlap/'                                        # trigger overlap tar files
-beamcluster_path = '/pnfs/annie/persistent/users/dajana/AmBe/AmBeOutlier/'                                            # BeamCluster root files
+beamcluster_path = '/pnfs/annie/persistent/users/dajana/AmBe/AmBe2.0v4/'                                            # BeamCluster root files
 beamfetcher_path = processed_path + 'BeamFetcherV2/'                                               # BeamFetcherV2 root files
 lappd_EB_path = processed_path + 'LAPPD_EB_output/'                                                # contains two subdirectories: LAPPDTree and offsetFit
 lappd_BC_path = beamcluster_path + 'LAPPDBeamClusterTrees/'                                        # filtered events w/ LAPPDs stored in root files
@@ -90,13 +86,12 @@ print('\n')
 usage_verbose = """
 #########################################################################################
 # ******* Event Building mode ********
-# args: --step_size --runs_to_run --node_loc --source_type
+# args: --step_size --runs_to_run --source_type
 
 # step_size   = number of part files per job for event building (recommendations below)
 #                - beam/cosmic:    2+2
 #                - AmBe/laser/LED: 1+2
 # runs_to_run = runs you would like to event build. It will ask you to enter one at a time
-# node_loc    = run OFFSITE or ONSITE (FermiGrid) jobs
 # source_type = run type ("beam", "cosmic", "AmBe", "LED", "laser", "beam_39")
 
 # Grid job specifications:
@@ -109,10 +104,9 @@ usage_verbose = """
 usage_verbose_BC = """
 #########################################################################################
 # ******* BeamCluster mode ********
-# args: --runs_to_run --node_loc --source_type
+# args: --runs_to_run --source_type
 
 # runs_to_run = runs you would like to run the BC toolchain over. It will ask you to enter one at a time
-# node_loc    = run OFFSITE or ONSITE (FermiGrid) jobs
 # source_type = run type ("beam", "cosmic", "AmBe", "LED", "laser")
 
 # Grid job specifications:
@@ -131,14 +125,7 @@ if which_mode == '1':      # Event building mode
 
     # user provided arguments
     step_size = int(input('Please specify the job part file size:     '))
-    which_node = int(input('\nOFFSITE (1) or ONSITE (2)  (OFFSITE is recommended):     '))
-    if which_node == 1:
-        node_loc = 'OFFSITE'
-    elif which_node == 2:
-        node_loc = 'ONSITE'
-    else:
-        print('\nWRONG INPUT, RE-RUN SCRIPT\n')
-        exit()
+    resub_step_size = 1    # not provided by user - manually set for resubmissions
 
     print('\n')
     runs_to_run_user = hs.get_runs_from_user()
@@ -184,7 +171,6 @@ if which_mode == '1':      # Event building mode
     print('  - Job part file size:  ' + str(step_size))
     print('  - Job re-submission part file size:  ' + str(resub_step_size))
     print('  - Runs to run: ', runs_to_run)
-    print('  - node location: ', node_loc)
     print('  - run type: ', run_type)
     print('\n')
     time.sleep(3)
@@ -247,7 +233,7 @@ if which_mode == '1':      # Event building mode
         # omit the runs that have some part files in /scratch
         exists_and_contains = os.path.exists(output_path + runs_to_run[i] + "/") and any(file.startswith('Processed') and not file.endswith(".data") for file in os.listdir(output_path + runs_to_run[i] + "/"))
         if exists_and_contains == False:
-            os.system('python3 lib/automated_submission.py ' + user + ' ' + runs_to_run[i] + ' n ' + str(small_step) + ' ' + DLS[i] + ' ' + TA_tar_name + ' ' + TA_folder + ' ' + scratch_path + ' ' + output_path + ' ' + raw_path + ' ' + trig_path + ' ' + beamfetcher_path + ' ' + node_loc + ' ' + run_type)   # no re-run
+            os.system('python3 lib/automated_submission.py ' + user + ' ' + runs_to_run[i] + ' n ' + str(small_step) + ' ' + DLS[i] + ' ' + TA_tar_name + ' ' + TA_folder + ' ' + scratch_path + ' ' + output_path + ' ' + raw_path + ' ' + trig_path + ' ' + beamfetcher_path + ' ' + run_type)   # no re-run
             time.sleep(3)
         else:
             print('\n' + runs_to_run[i] + ' processed files present in /scratch, not submitting this run in first batch...\n')
@@ -285,7 +271,7 @@ if which_mode == '1':      # Event building mode
                 reprocess = hs.missing_scratch(runs_to_run[i], raw_path, output_path, run_type)
                 time.sleep(1)
                 if reprocess == True:   # if there are missing files in scratch, re-submit
-                    os.system('python3 lib/automated_submission.py ' + user + ' ' + runs_to_run[i] + ' y ' + str(resub_step_size) + ' ' + DLS[i] + ' ' + TA_tar_name + ' ' + TA_folder + ' ' + scratch_path + ' ' + output_path + ' ' + raw_path + ' ' + trig_path + ' ' + beamfetcher_path + ' ' + node_loc + ' ' + run_type)
+                    os.system('python3 lib/automated_submission.py ' + user + ' ' + runs_to_run[i] + ' y ' + str(resub_step_size) + ' ' + DLS[i] + ' ' + TA_tar_name + ' ' + TA_folder + ' ' + scratch_path + ' ' + output_path + ' ' + raw_path + ' ' + trig_path + ' ' + beamfetcher_path + ' ' + run_type)
                     resubs[i] += 1
                 else:                   # if there aren't any missing files, transfer
                     if resubs[i] != -1:
@@ -331,19 +317,13 @@ if which_mode == '1':      # Event building mode
 
 if which_mode == '2':        # BeamCluster
 
+    BC_job_size = 50         # how many part files per job  (500 is the recommended max)
+
     print(usage_verbose_BC, '\n')
 
     print('\n*** Please ensure the run type is the same for all runs you plan on submitting ***\n')
     run_type = hs.get_run_type()     # will return 'beam', 'AmBe', etc...
 
-    which_node = int(input('OFFSITE (1) or ONSITE (2)  (OFFSITE is recommended):     '))
-    if which_node == 1:
-        node_loc = 'OFFSITE'
-    elif which_node == 2:
-        node_loc = 'ONSITE'
-    else:
-        print('\nWRONG INPUT, RE-RUN SCRIPT\n')
-        exit()
     print('\n')
     runs_to_run = hs.get_runs_from_user()
 
@@ -371,7 +351,6 @@ if which_mode == '2':        # BeamCluster
     print('The following argument has been provided:\n')
     print('  - Runs to run: ', runs_to_run)
     print('  - job size: ', BC_job_size)
-    print('  - node location: ', node_loc)
     print('  - run type: ', run_type)
     print('\n')
     time.sleep(3)
@@ -394,7 +373,7 @@ if which_mode == '2':        # BeamCluster
     complete_BC = 0      # when this value == number of runs, the while loop will complete
 
     # create job submission scripts  (since these scripts take args, we don't need to keep creating them for every job)
-    sj.submit_BC(scratch_path, BC_scratch_output_path, TA_tar_name, data_path, node_loc, lappd_pedestal_path)
+    sj.submit_BC(scratch_path, BC_scratch_output_path, TA_tar_name, data_path, lappd_pedestal_path)
     sj.grid_BC(user, TA_tar_name, TA_folder, scratch_path, run_type)
     sj.container_BC(TA_folder, scratch_path, run_type)
     time.sleep(1)
